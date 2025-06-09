@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import PyPDF2
@@ -14,29 +13,27 @@ api_key = st.text_input("Enter your OpenAI API key", type="password")
 pdf_file = st.file_uploader("Upload a PDF financial report", type=["pdf"])
 excel_file = st.file_uploader("Upload an Excel financial report", type=["xlsx", "xls"])
 
-# Extract text from PDF
+# Function to extract text from uploaded PDF file
 def extract_text_from_pdf(file):
     reader = PyPDF2.PdfReader(file)
     return "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
 
-# Ask question to GPT-4o
+# Function to query GPT-4o with financial context
 def ask_gpt4o(question, context, api_key):
-    openai.api_key = api_key
     client = OpenAI(api_key=api_key)
-
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": "You are a financial reporting assistant. Answer based only on the document content."},
-        {"role": "user", "content": f"{context}\n\nQuestion: {question}"}
-    ]
-)
-
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a financial reporting assistant. Answer based only on the document content."},
+            {"role": "user", "content": f"{context}\n\nQuestion: {question}"}
+        ]
+    )
     return response.choices[0].message.content
-    return response['choices'][0]['message']['content']
 
+# Main logic
 if pdf_file or excel_file:
     context = ""
+
     if pdf_file:
         with st.spinner("Extracting text from PDF..."):
             context += extract_text_from_pdf(pdf_file)
@@ -55,8 +52,11 @@ if pdf_file or excel_file:
         question = st.text_area("Enter your question about the financials:", height=100)
         if question and api_key:
             with st.spinner("Thinking..."):
-                answer = ask_gpt4o(question, context, api_key)
-                st.success("Answer:")
-                st.write(answer)
+                try:
+                    answer = ask_gpt4o(question, context, api_key)
+                    st.success("Answer:")
+                    st.write(answer)
+                except Exception as e:
+                    st.error(f"OpenAI error: {e}")
         elif question:
             st.warning("Please enter your OpenAI API key to get answers.")
