@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 import PyPDF2
-import openai
 from openai import OpenAI
 
 st.set_page_config(page_title="Financial Reporting Assistant", layout="wide")
