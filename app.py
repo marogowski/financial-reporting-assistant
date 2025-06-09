@@ -33,7 +33,7 @@ response = client.chat.completions.create(
     ]
 )
 
-return response.choices[0].message.content
+    return response.choices[0].message.content
     #return response['choices'][0]['message']['content']
 
 if pdf_file or excel_file:
