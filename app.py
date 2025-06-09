@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import PyPDF2
 import openai
+from openai import OpenAI
 
 st.set_page_config(page_title="Financial Reporting Assistant", layout="wide")
 st.title("📊 Financial Reporting Assistant (Prototype)")
@@ -22,14 +23,18 @@ def extract_text_from_pdf(file):
 # Ask question to GPT-4o
 def ask_gpt4o(question, context, api_key):
     openai.api_key = api_key
-    response = openai.ChatCompletion.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a financial reporting assistant. Answer based only on the document content."},
-            {"role": "user", "content": f"{context}\n\nQuestion: {question}"}
-        ]
-    )
-    return response['choices'][0]['message']['content']
+    client = OpenAI(api_key=api_key)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a financial reporting assistant. Answer based only on the document content."},
+        {"role": "user", "content": f"{context}\n\nQuestion: {question}"}
+    ]
+)
+
+return response.choices[0].message.content
+    #return response['choices'][0]['message']['content']
 
 if pdf_file or excel_file:
     context = ""
